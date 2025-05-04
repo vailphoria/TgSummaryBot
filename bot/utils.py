@@ -19,7 +19,7 @@ async def get_api_client():
         try:
             api_client = TelegramClient('api_session', API_ID, API_HASH)
             await api_client.start()
-            logger.info(f"Пользователь с номером {phone_number} успешно авторизован.")
+            logger.info("Клиент Telegram API успешно авторизован.")
         except Exception as e:
             logger.error(f"Ошибка при создании клиента Telegram API: {e}")
             return None
@@ -45,8 +45,21 @@ async def get_user_client(phone_number: str = "+79996559005"):
         try:
             loop = asyncio.get_event_loop()
             user_client = TelegramClient('user_session', API_ID, API_HASH, loop=loop)
+            logger.info(f"Попытка авторизации с номером: {phone_number}")
             logger.info(f"Попытка авторизации с номером {phone_number}")
-            await user_client.start(phone=phone_number)
+            await user_client.connect()
+            if not await user_client.is_user_authorized():
+                await user_client.send_code_request(phone_number)
+                logger.info("Код подтверждения отправлен. Введите код:")
+                code = input("Введите код подтверждения (например, 12345): ")
+                if not code:
+                    logger.error("Код подтверждения не был введен.")
+                    return None
+                try:
+                    await user_client.sign_in(phone_number, code)
+                except Exception as e:
+                    logger.error(f"Ошибка при вводе кода подтверждения: {e}")
+                    return None
         except Exception as e:
             logger.error(f"Ошибка при создании клиента пользователя Telethon: {e}")
             return None

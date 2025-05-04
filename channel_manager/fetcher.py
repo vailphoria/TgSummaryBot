@@ -38,7 +38,7 @@ async def fetch_new_messages(channel_id, channel_url, last_message_id=0):
     """
     try:
         from bot.utils import get_user_client
-        client = await get_user_client(phone_number="YOUR_PHONE_NUMBER")
+        client = await get_user_client(phone_number="+79996559005")
         if not client:
             return []
         
