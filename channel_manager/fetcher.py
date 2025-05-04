@@ -47,10 +47,21 @@ async def fetch_new_messages(channel_id, channel_url, last_message_id=0):
         if channel_url.startswith('@'):
             username = channel_url[1:]
         
-        # Получаем канал
-        entity = await client.get_entity(username)
+        logger.info(f"Обработка канала: channel_url={channel_url}, username={username}")
+        try:
+            entity = await client.get_entity(username)
+        except Exception as e:
+            logger.error(f"Проверка канала {username} не удалась: {e}")
+            return []
         
-        # Получаем новые сообщения
+        # Подписываемся на канал
+        try:
+            await client(JoinChannelRequest(username))
+            logger.info(f"Успешно подписались на канал: {username}")
+        except Exception as e:
+            logger.error(f"Не удалось подписаться на канал {username}: {e}")
+            return []
+        
         messages = await client.get_messages(
             entity,
             limit=100,  # Ограничиваем количество сообщений

@@ -1,3 +1,1 @@
 # TgSummaryBot
-
-Hello

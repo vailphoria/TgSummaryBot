@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import asyncio
 import re
 from telethon import TelegramClient
 from telethon.tl.functions.channels import GetFullChannelRequest, JoinChannelRequest
@@ -6,6 +7,24 @@ from telethon.tl.types import Channel, Chat
 import logging
 
 from config import API_ID, API_HASH
+
+# Настройка клиента Telegram API
+api_client = None
+
+async def get_api_client():
+    """Получение или создание клиента Telegram API"""
+    global api_client
+    
+    if api_client is None:
+        try:
+            api_client = TelegramClient('api_session', API_ID, API_HASH)
+            await api_client.start()
+            logger.info(f"Пользователь с номером {phone_number} успешно авторизован.")
+        except Exception as e:
+            logger.error(f"Ошибка при создании клиента Telegram API: {e}")
+            return None
+    
+    return api_client
 
 # Настройка логирования
 logging.basicConfig(
@@ -18,7 +37,7 @@ logger = logging.getLogger(__name__)
 
 user_client = None
 
-async def get_user_client(phone_number: str):
+async def get_user_client(phone_number: str = "+79996559005"):
     """Получение или создание клиента Telethon для пользователя"""
     global user_client
     
@@ -26,7 +45,8 @@ async def get_user_client(phone_number: str):
         try:
             loop = asyncio.get_event_loop()
             user_client = TelegramClient('user_session', API_ID, API_HASH, loop=loop)
-            await user_client.connect()
+            logger.info(f"Попытка авторизации с номером {phone_number}")
+            await user_client.start(phone=phone_number)
         except Exception as e:
             logger.error(f"Ошибка при создании клиента пользователя Telethon: {e}")
             return None
