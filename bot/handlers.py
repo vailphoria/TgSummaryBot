@@ -157,7 +157,10 @@ async def cmd_summarize(message: Message):
     
     # Формируем итоговую суммаризацию
     summary_text = "Суммаризация за последний час:\n\n"
-    for msg in unique_messages:
-        summary_text += f"- {msg['message_text']}\n"
+    for group in unique_messages:
+        for msg_id in group:
+            message = db.get_message_by_id(msg_id)
+            if message:
+                summary_text += f"- {message['message_text']}\n"
     
     await message.answer(summary_text)
